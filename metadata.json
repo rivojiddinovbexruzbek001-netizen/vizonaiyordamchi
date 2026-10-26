@@ -1,0 +1,6 @@
+{
+  "name": "VizonYORDAMCHI",
+  "description": "VizonYORDAMCHI — Raqamli xizmatlaringiz uchun aqlli yordamchi. YouTube, AI video, AI musiqa va zamonaviy website xizmatlari.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
