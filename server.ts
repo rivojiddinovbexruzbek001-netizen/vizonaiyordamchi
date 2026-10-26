@@ -16,15 +16,17 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(express.json());
 
-// Persistent Database Directory & File
-const DATA_DIR = path.resolve(__dirname, 'data');
+// Persistent Database Directory & File (support Vercel /tmp writable directory)
+const DATA_DIR = process.env.VERCEL ? path.resolve('/tmp', 'data') : path.resolve(__dirname, 'data');
 const DB_FILE = path.resolve(DATA_DIR, 'db.json');
+const ROOT_DB_FILE = path.resolve(__dirname, 'data', 'db.json');
 
 interface DatabaseSchema {
   admin: {
     username: string;
-    salt: string;
-    passwordHash: string;
+    authorizedPhone: string;
+    salt?: string;
+    passwordHash?: string;
   };
   services: ServiceItem[];
   orders: Order[];
@@ -42,17 +44,42 @@ function initDatabase(): DatabaseSchema {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
 
+  // If on Vercel and DB_FILE does not exist in /tmp, seed from project root db.json
+  if (!fs.existsSync(DB_FILE) && fs.existsSync(ROOT_DB_FILE)) {
+    try {
+      fs.copyFileSync(ROOT_DB_FILE, DB_FILE);
+    } catch (e) {
+      console.warn('Could not copy initial db file:', e);
+    }
+  }
+
   if (fs.existsSync(DB_FILE)) {
     try {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
-      const parsed = JSON.parse(content);
+      const parsed: DatabaseSchema = JSON.parse(content);
+      
+      // Ensure authorizedPhone is set to user's phone number
+      if (!parsed.admin.authorizedPhone) {
+        parsed.admin.authorizedPhone = '+998995562626';
+      }
+
+      // Ensure website service price is updated to 25,000 UZS
+      const webService = parsed.services.find((s) => s.id === 'srv-website');
+      if (webService) {
+        webService.basePrice = 25000;
+        webService.priceDisplayUz = '25 000 so‘mdan';
+        webService.priceDisplayRu = 'от 25 000 сум';
+        webService.priceDisplayEn = 'from 25,000 UZS';
+        webService.priceDisplayTj = 'аз 25 000 сӯм';
+      }
+
+      fs.writeFileSync(DB_FILE, JSON.stringify(parsed, null, 2), 'utf-8');
       return parsed;
     } catch (e) {
       console.error('Error reading db.json, recreating with defaults:', e);
     }
   }
 
-  // Create initial admin with a secure default or env override
   const initialAdminPass = process.env.ADMIN_PASSWORD || 'vizon2026!';
   const salt = crypto.randomBytes(16).toString('hex');
   const passwordHash = hashPassword(initialAdminPass, salt);
@@ -60,6 +87,7 @@ function initDatabase(): DatabaseSchema {
   const initialDb: DatabaseSchema = {
     admin: {
       username: 'admin',
+      authorizedPhone: '+998995562626',
       salt,
       passwordHash,
     },
@@ -207,22 +235,41 @@ app.post('/api/orders', (req: Request, res: Response) => {
   });
 });
 
-// 3. Admin Login
+// 3. Admin Login (Phone-based without secret code/password requirement)
 app.post('/api/admin/login', (req: Request, res: Response) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    res.status(400).json({ error: 'Login va parolni kiriting.' });
+  const { phone, password } = req.body;
+  
+  if (!phone && !password) {
+    res.status(400).json({ error: 'Administrator telefon raqamini kiriting.' });
     return;
   }
 
-  if (username !== db.admin.username) {
-    res.status(401).json({ error: 'Login yoki parol xato!' });
-    return;
+  // Authorized admin phone digits
+  const targetAuthorizedDigits = (db.admin.authorizedPhone || '+998995562626').replace(/\D/g, '');
+
+  let isAuthorized = false;
+
+  if (phone) {
+    const enteredDigits = phone.toString().replace(/\D/g, '');
+    // Match exact digits or local 9-digit suffix (e.g. 995562626 vs 998995562626)
+    if (
+      enteredDigits === targetAuthorizedDigits ||
+      (enteredDigits.length === 9 && targetAuthorizedDigits.endsWith(enteredDigits))
+    ) {
+      isAuthorized = true;
+    }
   }
 
-  const hash = hashPassword(password, db.admin.salt);
-  if (hash !== db.admin.passwordHash) {
-    res.status(401).json({ error: 'Login yoki parol xato!' });
+  // Backup fallback for password if ever used
+  if (!isAuthorized && password && db.admin.salt && db.admin.passwordHash) {
+    const hash = hashPassword(password, db.admin.salt);
+    if (hash === db.admin.passwordHash) {
+      isAuthorized = true;
+    }
+  }
+
+  if (!isAuthorized) {
+    res.status(401).json({ error: 'Faqat ruxsat berilgan administrator telefon raqami orqali kirish mumkin!' });
     return;
   }
 
@@ -239,7 +286,7 @@ app.post('/api/admin/login', (req: Request, res: Response) => {
   res.json({
     success: true,
     token,
-    user: { username: db.admin.username },
+    user: { username: db.admin.username, phone: db.admin.authorizedPhone },
   });
 });
 
@@ -417,6 +464,9 @@ app.put('/api/admin/settings', requireAdmin, (req: Request, res: Response) => {
     ...db.settings,
     ...req.body,
   };
+  if (req.body.contactPhone) {
+    db.admin.authorizedPhone = req.body.contactPhone;
+  }
   saveDatabase();
   res.json({ success: true, settings: db.settings });
 });
@@ -459,4 +509,8 @@ async function startServer() {
   });
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;

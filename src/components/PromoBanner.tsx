@@ -66,7 +66,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({
               </div>
               <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 backdrop-blur-sm">
                 <span className="text-[11px] text-slate-400 block">Website Yaratish</span>
-                <span className="text-xs sm:text-sm font-bold text-amber-400">50 000 so‘mdan</span>
+                <span className="text-xs sm:text-sm font-bold text-amber-400">25 000 so‘mdan</span>
               </div>
             </div>
 

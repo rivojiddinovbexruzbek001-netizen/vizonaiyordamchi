@@ -2,7 +2,8 @@
   "admin": {
     "username": "admin",
     "salt": "ae0512241cbb16df3817881b7b03bd9b",
-    "passwordHash": "e823a5e6150dcca17fb2e01e1c06c573497608101f23cb54b24e30fa942f3b4e0f4db767a53a5d1e1ebd78796a729f87d8d7917c1fc0a00620c87a556ce5b19d"
+    "passwordHash": "e823a5e6150dcca17fb2e01e1c06c573497608101f23cb54b24e30fa942f3b4e0f4db767a53a5d1e1ebd78796a729f87d8d7917c1fc0a00620c87a556ce5b19d",
+    "authorizedPhone": "+998995562626"
   },
   "services": [
     {
@@ -122,11 +123,11 @@
       "descRu": "Современные, адаптивные и быстрые веб-сайты для бизнеса, образовательных и личных проектов.",
       "descEn": "Modern, responsive, ultra-fast websites for business, educational institutions, and personal portfolios.",
       "descTj": "Вебсайтҳои муосир, мутобиқ ба телефон ва босуръат барои тиҷорат ва лоиҳаҳои шахсӣ.",
-      "priceDisplayUz": "50 000 so‘mdan",
-      "priceDisplayRu": "от 50 000 сум",
-      "priceDisplayEn": "from 50,000 UZS",
-      "priceDisplayTj": "аз 50 000 сӯм",
-      "basePrice": 50000,
+      "priceDisplayUz": "25 000 so‘mdan",
+      "priceDisplayRu": "от 25 000 сум",
+      "priceDisplayEn": "from 25,000 UZS",
+      "priceDisplayTj": "аз 25 000 сӯм",
+      "basePrice": 25000,
       "category": "web",
       "badge": "Premium",
       "iconName": "Globe",
@@ -217,6 +218,18 @@
     "b1d1e803744743780bbdda3180782f9324d1ae36170d103d9958bd3d16e9cde0": {
       "username": "admin",
       "expiresAt": 1793620112685
+    },
+    "adbda60bd0d19df6f83f3e2e3230d7b32672a9306096422b90fb349e2504e1c3": {
+      "username": "admin",
+      "expiresAt": 1793620800639
+    },
+    "9c0c05d973d4596ace07f30b606a42908e34399826bb15de3295dde7e3d97f96": {
+      "username": "admin",
+      "expiresAt": 1793620804942
+    },
+    "d6af5b6fb27c40c4319ef60c914c290687fa946c8e98732ce3d7e6f229363356": {
+      "username": "admin",
+      "expiresAt": 1793620865645
     }
   }
 }

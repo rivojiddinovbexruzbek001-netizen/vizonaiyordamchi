@@ -65,4 +65,5 @@ export interface SiteSettings {
   youtubeUrl: string;
   bannerTitle: string;
   bannerSubtitle: string;
+  adminPhone?: string;
 }

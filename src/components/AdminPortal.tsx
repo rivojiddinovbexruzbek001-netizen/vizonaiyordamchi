@@ -50,8 +50,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const t = translations[lang];
 
   // Auth State
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('');
+  const [adminPhoneInput, setAdminPhoneInput] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -166,18 +165,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ phone: adminPhoneInput }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || t.adminLoginError);
+        throw new Error(data.error || 'Faqat ruxsat berilgan administrator telefon raqami orqali kirish mumkin!');
       }
 
       onLoginSuccess(data.token);
-      setPassword('');
+      setAdminPhoneInput('');
     } catch (err: any) {
-      setLoginError(err.message || t.adminLoginError);
+      setLoginError(err.message || 'Kirishda xatolik yuz berdi');
     } finally {
       setLoginLoading(false);
     }
@@ -438,29 +437,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    {t.adminUsernameLabel}
+                    Telefon raqamingiz
                   </label>
                   <input
-                    type="text"
+                    type="tel"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
+                    value={adminPhoneInput}
+                    onChange={(e) => setAdminPhoneInput(e.target.value)}
+                    placeholder="+998 99 556 26 26"
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    {t.adminPasswordLabel}
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono"
-                  />
+                  <p className="text-[11px] text-slate-500 mt-1.5 leading-snug">
+                    Parol talab qilinmaydi. Tizim faqat vakolatli telefon raqami (+998 99 556 26 26) kiritilganda ochiladi.
+                  </p>
                 </div>
 
                 <button
@@ -468,7 +457,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   disabled={loginLoading}
                   className="w-full py-2.5 text-sm font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl transition-all shadow-md shadow-amber-500/20 active:scale-[0.98] disabled:opacity-50 mt-2"
                 >
-                  {loginLoading ? 'Kirilmoqda...' : t.adminLoginBtn}
+                  {loginLoading ? 'Tekshirilmoqda...' : 'Admin panelga kirish'}
                 </button>
               </form>
             </div>
